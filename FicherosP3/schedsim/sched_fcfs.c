@@ -71,7 +71,7 @@ static task_t* steal_task_fcfs(runqueue_t* rq,int cpu){
 }
     
 
-sched_class_t rr_sched={
+sched_class_t fcfs_sched={
     .sched_init=sched_init_fcfs,
     .sched_destroy=sched_destroy_fcfs,      
     .task_new=task_new_fcfs,

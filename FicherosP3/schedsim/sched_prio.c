@@ -1,17 +1,17 @@
 #include "sched.h"
 
 
-void sched_init_fcfs(void) {}
+void sched_init_prio(void) {}
 
-void sched_destroy_fcfs(void) {}
+void sched_destroy_prio(void) {}
   
 
-static void task_new_fcfs(task_t* t){
+static void task_new_prio(task_t* t){
     /* initialize the quantum */
     //t->remaining_ticks_slice=rr_quantum;
 }
 
-static task_t* pick_next_task_fcfs(runqueue_t* rq,int cpu) {
+static task_t* pick_next_task_prio(runqueue_t* rq,int cpu) {
     task_t* t=head_slist(&rq->tasks);
     
     if (t) {
@@ -24,7 +24,7 @@ static task_t* pick_next_task_fcfs(runqueue_t* rq,int cpu) {
     return t;
 }
 
-static void enqueue_task_fcfs(task_t* t,int cpu, int runnable) {
+static void enqueue_task_prio(task_t* t,int cpu, int runnable) {
     runqueue_t* rq=get_runqueue_cpu(cpu);
     
     if (t->on_rq || is_idle_task(t))
@@ -42,7 +42,7 @@ static void enqueue_task_fcfs(task_t* t,int cpu, int runnable) {
 }
 
 
-static void task_tick_fcfs(runqueue_t* rq,int cpu){
+static void task_tick_prio(runqueue_t* rq,int cpu){
     
     task_t* current=rq->cur_task;
     
@@ -59,7 +59,7 @@ static void task_tick_fcfs(runqueue_t* rq,int cpu){
         rq->nr_runnable--; // The task is either exiting or going to sleep right now    
 }
 
-static task_t* steal_task_fcfs(runqueue_t* rq,int cpu){
+static task_t* steal_task_prio(runqueue_t* rq,int cpu){
     task_t* t=tail_slist(&rq->tasks);
     
     if (t) {
@@ -71,7 +71,7 @@ static task_t* steal_task_fcfs(runqueue_t* rq,int cpu){
 }
     
 
-sched_class_t rr_sched={
+sched_class_t prio_sched={
     .sched_init=sched_init_fcfs,
     .sched_destroy=sched_destroy_fcfs,      
     .task_new=task_new_fcfs,
