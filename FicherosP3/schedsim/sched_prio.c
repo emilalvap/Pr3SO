@@ -23,7 +23,11 @@ static task_t* pick_next_task_prio(runqueue_t* rq,int cpu) {
     
     return t;
 }
-
+static int compare_tasks_cpu_burst(void *t1,void *t2) {
+    task_t* tsk1=(task_t*)t1;
+    task_t* tsk2=(task_t*)t2;
+    return tsk1->prio-tsk2->prio;
+}
 static void enqueue_task_prio(task_t* t,int cpu, int runnable) {
     runqueue_t* rq=get_runqueue_cpu(cpu);
     
@@ -54,7 +58,7 @@ static void task_tick_prio(runqueue_t* rq,int cpu){
    /* if (current->remaining_ticks_slice<=0) {
         rq->need_resched=TRUE; //Force a resched !!
     }*/
-    
+    rq->need_resched=TRUE; //Force a resched !!
     if (current->runnable_ticks_left==1) 
         rq->nr_runnable--; // The task is either exiting or going to sleep right now    
 }
@@ -72,11 +76,11 @@ static task_t* steal_task_prio(runqueue_t* rq,int cpu){
     
 
 sched_class_t prio_sched={
-    .sched_init=sched_init_fcfs,
-    .sched_destroy=sched_destroy_fcfs,      
-    .task_new=task_new_fcfs,
-    .pick_next_task=pick_next_task_fcfs,
-    .enqueue_task=enqueue_task_fcfs,
-    .task_tick=task_tick_fcfs,
-    .steal_task=steal_task_fcfs
+    .sched_init=sched_init_prio,
+    .sched_destroy=sched_destroy_prio,      
+    .task_new=task_new_prio,
+    .pick_next_task=pick_next_task_prio,
+    .enqueue_task=enqueue_task_prio,
+    .task_tick=task_tick_prio,
+    .steal_task=steal_task_prio
 };
