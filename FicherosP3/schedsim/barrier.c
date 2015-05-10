@@ -27,6 +27,11 @@ int sys_barrier_init(sys_barrier_t *barrier, unsigned int nr_threads)
    /* Inicializar campos de la estructura sys_barrier
         ... Completar ....
    */
+    if(!barrier)pthread_mutex_init(&barrier->mutex,NULL);
+    if(!barrier)pthread_cond_init(&barrier->cond,NULL);
+    barrier->max_threads = nr_threads;
+    barrier->nr_threads_arrived = 0;
+
     return 0;
 }
 
@@ -36,6 +41,8 @@ int sys_barrier_destroy(sys_barrier_t *barrier)
    /* Destruir recursos de sincronizacion asociados a la barrera
         ... Completar ....
    */
+    pthread_mutex_destroy(&barrier->mutex);
+    pthread_cond_destroy(&barrier->cond);
    return 0;
 }
 
@@ -53,6 +60,16 @@ int sys_barrier_wait(sys_barrier_t *barrier)
 
         ... Completar ....  
     */
+    pthread_mutex_lock(&barrier->mutex);  
+    barrier->nr_threads_arrived++; 
+    if(barrier->nr_threads_arrived==barrier->max_threads){
+      pthread_cond_broadcast(&barrier->cond);
+      sys_barrier_init(barrier, barrier->max_threads);
+    }
+    else
+      pthread_cond_wait(&barrier->cond,&barrier->mutex);
+
+    pthread_mutex_unlock(&barrier->mutex);
     return 0;
 }
 
