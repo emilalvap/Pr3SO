@@ -1,0 +1,44 @@
+#!/bin/bash
+FILE=0;
+N=0;
+schedulers=( FCFS PRIO RR SJF );
+make;
+echo "> Simulador Test"; 
+until [[ $FILE -eq 1 ]]; do
+	echo ">>> Nombre del ejemplo a simular";
+	read FILENAME;
+	if [ -f ./examples/$FILENAME ]; then
+		FILE=1;
+	else
+		echo "El archivo especificado no existe";
+	fi
+done
+until [ $N -gt 0 ] && [ $N -le 8 ]; do
+	echo ">>> Número maximo de CPUs";
+	read N;
+	if [ $N -le 0 ] || [ $N -gt 8 ]; then
+		echo "El numero de CPUs debe estar entre 1-8";
+	fi
+done
+if [[ -d resultados ]]; then
+	rm -rf ./resultados;
+fi
+mkdir resultados;
+
+for ((cpus=1;cpus<=N;cpus++)); do
+	mkdir ./resultados/${cpus}MAXCPU;
+	for nameSched in ${schedulers[*]}; do
+		./schedsim -n $cpus -i ./examples/$FILENAME -s $nameSched;
+		for ((i=0;i<cpus;i++)); do
+			mv CPU_$i.log ./resultados/${cpus}MAXCPU/${nameSched}-CPU${i};
+		done
+	done
+done
+cd ../gantt-gplot;
+for ((cpus=1;cpus<=N;cpus++)); do
+	for nameSched in ${schedulers[*]}; do
+		for ((i=0;i<cpus;i++)); do
+			./generate_gantt_chart ../schedsim/resultados/${cpus}MAXCPU/${nameSched}-CPU${i};
+		done
+	done
+done
